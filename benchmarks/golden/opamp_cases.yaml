@@ -1,0 +1,24 @@
+- id: OP-01-ac-coupled-missing-bias
+  pack: opamp
+  state:
+    design_intent: "AC-coupled line input buffer"
+    version: "case-op-01"
+    constraints: {}
+    components:
+      U1: {part_id: "U1", kind: "opamp", value: "OPA1656"}
+      CDEC: {part_id: "CDEC", kind: "capacitor", value: "100nF", max_voltage: 16.0}
+  expect:
+    status: HARD_FAIL
+    rules: ["OPAMP_INPUT_BIAS_RETURN_MISSING"]
+
+- id: OP-02-missing-decoupling
+  pack: opamp
+  state:
+    design_intent: "opamp buffer"
+    version: "case-op-02"
+    constraints: {}
+    components:
+      U1: {part_id: "U1", kind: "opamp", value: "OPA1656"}
+  expect:
+    status: CONFLICT_REQUIRES_REVIEW
+    rules: ["OPAMP_DECOUPLING_MISSING"]

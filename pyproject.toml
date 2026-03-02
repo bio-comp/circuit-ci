@@ -1,0 +1,30 @@
+[project]
+name = "circuit-ci"
+version = "0.0.1"
+description = "Circuit-CI: CI/CD for circuits (lint → staging → measurement plans)."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name="Mike Hamilton"}]
+license = {text = "Apache-2.0"}
+dependencies = [
+  "pydantic>=2.6",
+  "pyyaml>=6.0",
+  "typer>=0.12",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "hypothesis>=6.0",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+cci = "circuit_ci.cli.app:main"
+circuitci = "circuit_ci.cli.app:main"
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+addopts = "-q"

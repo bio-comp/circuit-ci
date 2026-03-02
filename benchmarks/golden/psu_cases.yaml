@@ -1,0 +1,28 @@
+- id: PSU-01-divider-meltdown
+  pack: psu
+  state:
+    design_intent: "12V to 5V divider"
+    version: "case-psu-01"
+    constraints:
+      vin_v: 12.0
+      target_v_out: 5.0
+    components:
+      R1: {part_id: "R1", kind: "resistor", value: 100, max_power_watts: 0.25}
+      R2: {part_id: "R2", kind: "resistor", value: 100, max_power_watts: 0.25}
+  expect:
+    status: HARD_FAIL
+    rules: ["PSU_RATING_RESISTOR_WATTAGE"]
+
+- id: PSU-02-cap-underrated
+  pack: psu
+  state:
+    design_intent: "13.8V output"
+    version: "case-psu-02"
+    constraints:
+      vin_v: 18.0
+      target_v_out: 13.8
+    components:
+      COUT: {part_id: "COUT", kind: "capacitor", value: "470uF", max_voltage: 10.0}
+  expect:
+    status: HARD_FAIL
+    rules: ["PSU_RATING_CAP_VOLTAGE"]
