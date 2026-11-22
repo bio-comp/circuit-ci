@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List
 
 from ...core.engine import PackMeta, build_result
-from ...core.schemas import CircuitState, Finding, ProposedChange, Severity
+from ...core.schemas import CircuitState, Finding, LinterResult, ProposedChange, Severity
 
 PACK = PackMeta(pack_id="electronics_opamp", version="0.0.1")
 
@@ -39,7 +39,7 @@ def check_bias_return_present(state: CircuitState) -> List[Finding]:
     return []
 
 
-def lint(state: CircuitState, plan: ProposedChange | None = None):
+def lint(state: CircuitState, plan: ProposedChange | None = None) -> LinterResult:
     findings: List[Finding] = []
     findings += check_bias_return_present(state)
     findings += check_missing_decoupling(state)

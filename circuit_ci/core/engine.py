@@ -24,5 +24,7 @@ def route_findings(findings: List[Finding]) -> Status:
 
 def build_result(*, findings: List[Finding], state_version: str, pack: PackMeta) -> LinterResult:
     status = route_findings(findings)
-    audit = AuditPacket(state_version=state_version, pack_id=pack.pack_id, pack_version=pack.version)
+    audit = AuditPacket(
+        state_version=state_version, pack_id=pack.pack_id, pack_version=pack.version
+    )
     return LinterResult(status=status, findings=findings, audit=audit)
