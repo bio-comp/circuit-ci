@@ -58,8 +58,10 @@ def test_cli_rejects_unknown_pack() -> None:
 
 def test_cli_rejects_missing_input_file(tmp_path: Path) -> None:
     result = runner.invoke(app, [str(tmp_path / "does-not-exist.yaml")])
-    assert result.exit_code != 0
-    assert "does-not-exist" in result.output
+    # Rich truncates long paths differently across terminal widths and OSes.
+    # Click's usage-error exit status is the stable negative-control contract.
+    assert result.exit_code == 2
+    assert "Error" in result.output
 
 
 def test_cli_rejects_invalid_state(tmp_path: Path) -> None:
