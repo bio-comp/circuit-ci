@@ -45,11 +45,14 @@ def check_clean_head() -> str:
         raise RuntimeError("Cannot resolve HEAD")
     if git("status", "--porcelain=v1", "--untracked-files=normal"):
         raise RuntimeError("Working tree is not clean; outgoing HEAD is not qualified")
-    # prek/pre-commit passes the pushed local SHA via this environment variable,
-    # when available. A mismatched SHA is never an accepted push.
-    pushed_sha = os.environ.get("PRE_COMMIT_FROM_REF")
+    # In pre-push, PRE_COMMIT_TO_REF is the *local* SHA being published;
+    # PRE_COMMIT_FROM_REF is the remote SHA before the push (or zeroes).
+    # This hook covers a single current-HEAD push; other refs need independent checks.
+    if os.environ.get("PREK_HOOK_STAGE") == "pre-push" and not os.environ.get("PRE_COMMIT_TO_REF"):
+        raise RuntimeError("Pre-push hook did not supply the outgoing SHA")
+    pushed_sha = os.environ.get("PRE_COMMIT_TO_REF")
     if pushed_sha and pushed_sha != head:
-        raise RuntimeError("Pushed SHA differs from the clean checked-out HEAD")
+        raise RuntimeError("Outgoing SHA differs from the clean checked-out HEAD")
     return head
 
 
