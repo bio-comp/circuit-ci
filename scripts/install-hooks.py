@@ -22,7 +22,11 @@ def main() -> None:
     common_dir = Path(git("rev-parse", "--path-format=absolute", "--git-common-dir")).resolve()
     if git_dir != common_dir:
         raise RuntimeError("Refusing to install shared Git hooks from a linked worktree")
-    legacy = Path(git("rev-parse", "--path-format=absolute", "--git-path", "hooks/pre-push.legacy"))
+    legacy = (
+        Path(git("rev-parse", "--path-format=absolute", "--git-common-dir"))
+        / "hooks"
+        / "pre-push.legacy"
+    )
     if legacy.is_symlink() and legacy.resolve() == GUARD.resolve():
         pass
     elif legacy.exists() or legacy.is_symlink():

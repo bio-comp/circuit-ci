@@ -65,8 +65,10 @@ def validate_ref_updates(payload: str, *, head: str, branch: str) -> None:
 
 def require_ref_guard_installed() -> None:
     """Fail if prek was installed without its required complete-ref guard."""
-    legacy_path = Path(
-        git("rev-parse", "--path-format=absolute", "--git-path", "hooks/pre-push.legacy")
+    legacy_path = (
+        Path(git("rev-parse", "--path-format=absolute", "--git-common-dir"))
+        / "hooks"
+        / "pre-push.legacy"
     )
     if not legacy_path.is_symlink() or legacy_path.resolve() != Path(__file__).resolve():
         raise RuntimeError(
