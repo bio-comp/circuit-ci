@@ -33,6 +33,11 @@ def main() -> None:
         raise RuntimeError(f"Existing legacy hook must be preserved: {legacy}")
     if not GUARD.is_file() or not os.access(GUARD, os.X_OK):
         raise RuntimeError("Ref guard source must exist and be executable")
+    existing_pre_push = common_dir / "hooks" / "pre-push"
+    if existing_pre_push.exists():
+        content = existing_pre_push.read_text(encoding="utf-8")
+        if "prek" not in content or "hook-impl" not in content:
+            raise RuntimeError("Refusing to replace an unowned pre-push hook")
     subprocess.run(
         (
             "uv",

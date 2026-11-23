@@ -71,9 +71,12 @@ refuses to overwrite any existing unrelated legacy hook. Running `prek
 install` **alone is insufficient**: the full pre-push gate fails closed if
 the ref-set guard is missing. The guard accepts only a clean current-HEAD
 single branch push; tags, deletions, additional refs and non-HEAD sources
-are rejected, not silently skipped. Normal full local checks still run inside
-prek after the guard. Hooks can be bypassed and are not a security boundary;
-GitHub CI independently runs the quality gates.
+are rejected, not silently skipped. For outgoing commits that require checking, prek then runs the full local
+Ruff/mypy/pytest/coverage/packaging gate. Prek can skip that full stage when
+Git recognizes all commits as already present on the remote; the legacy guard
+still independently validates the complete ref set and clean worktree.
+Hooks can be bypassed and are not a security boundary; GitHub CI independently
+runs the quality gates.
 
 The CI matrix sets `UV_PYTHON` for every uv operation and asserts the
 **actual** interpreter rather than trusting the matrix job label.
