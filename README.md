@@ -22,7 +22,15 @@ The `ProposedChange` argument is accepted but **not applied**; see
 
 **Not implemented:** connectivity-aware analysis, architecture-feasibility
 qualification, applied edits, DigiKey/KiCad Happy integration, SPICE execution,
-physical measurement, production telemetry, or source-backed safety approval.
+measurement-plan generation/execution, physical measurement, production
+telemetry, or source-backed safety approval.
+
+**CLI warning:** a successful `cci` process exit is currently only a reporting
+success. In particular, a JSON `HARD_FAIL` verdict can return shell exit code
+**0**. A shell/CI caller must explicitly parse the JSON and apply its own
+policy; it must not use the current CLI as a fail-closed design gate. The
+reporter/gate exit contract is owned by
+[issue #12](https://github.com/bio-comp/circuit-ci/issues/12).
 The original `staging` and `telemetry` files are placeholders.
 
 ## Reproducible development
@@ -48,18 +56,27 @@ uv build
 measured 87.93% on Python 3.11 and 3.13 with the new CLI/metadata tests.
 The inherited two-test baseline covered 74%; do not lower the gate to conceal failures.
 
-For fast pre-commit and full pre-push checks, install the single configured
-`prek` hook manager **in a checkout with an isolated Git hook directory**:
+For fast pre-commit and full pre-push checks in a **standalone clone with its
+own Git hook directory**, run:
 
 ```bash
 uv run --locked prek validate-config .pre-commit-config.yaml
-uv run --locked prek install --hook-type pre-commit --hook-type pre-push
+uv run --locked python scripts/install-hooks.py
 ```
 
-Pre-push validation is intentionally scoped to a clean, single-ref push of
-the current HEAD; unusual ref operations require independent SHA qualification.
-CI independently runs the gates. These hooks are developer safeguards rather
-than a security boundary.
+This installs **prek** as the single hook manager and a small complete-ref
+validator through prek's supported `pre-push.legacy` hook interface. Its
+installation refuses linked worktrees (whose hook directory is shared) and
+refuses to overwrite any existing unrelated legacy hook. Running `prek
+install` **alone is insufficient**: the full pre-push gate fails closed if
+the ref-set guard is missing. The guard accepts only a clean current-HEAD
+single branch push; tags, deletions, additional refs and non-HEAD sources
+are rejected, not silently skipped. Normal full local checks still run inside
+prek after the guard. Hooks can be bypassed and are not a security boundary;
+GitHub CI independently runs the quality gates.
+
+The CI matrix sets `UV_PYTHON` for every uv operation and asserts the
+**actual** interpreter rather than trusting the matrix job label.
 
 ## Engineering roadmap
 
