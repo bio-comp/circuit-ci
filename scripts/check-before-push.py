@@ -106,6 +106,10 @@ def full_gate() -> None:
 def ref_guard() -> None:
     # Git invokes the legacy hook with remote name/URL and complete refs on stdin.
     # Prek 0.5.11 forwards the raw Git stdin to this supported legacy hook.
+    # It may skip the ordinary full hook when all outgoing commits already
+    # exist on the remote; this guard must independently reject dirty trees.
+    if git("status", "--porcelain=v1", "--untracked-files=normal"):
+        raise RuntimeError("Working tree is not clean; refusing ref publication")
     updates = sys.stdin.read()
     validate_ref_updates(
         updates,
