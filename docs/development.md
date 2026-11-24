@@ -18,8 +18,12 @@ uv build
 ```
 
 The documentation build uses strict internal Markdown link and anchor
-validation. The output check additionally verifies generated local file
-links and the required published YAML example, without fetching external URLs.
+validation. The output check verifies local file targets in generated HTML
+`href`, `src`, image/source `srcset`, link `imagesrcset`, and video `poster`
+attributes, plus the required published YAML example. It does not fetch external
+URLs or validate image descriptor conformance, media decoding, CSS URLs,
+JavaScript-generated requests, embedded documents, or custom HTML base URLs.
+Use normal project-relative links; review other resource mechanisms explicitly.
 Generated pages are in `site/`. Preview locally with
 `uv run --locked zensical serve`. Neither link validation nor a successful
 Python test establishes electrical correctness.
