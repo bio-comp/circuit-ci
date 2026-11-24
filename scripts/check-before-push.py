@@ -34,6 +34,7 @@ COMMANDS: tuple[tuple[str, ...], ...] = (
     ),
     ("uv", "run", "--locked", "cci", "--help"),
     ("uv", "run", "--locked", "circuitci", "--help"),
+    ("uv", "run", "--locked", "zensical", "build", "--clean"),
     ("uv", "build"),
 )
 

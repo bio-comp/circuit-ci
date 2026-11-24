@@ -1,0 +1,59 @@
+name: Publish documentation
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    env:
+      UV_PYTHON: "3.13"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: false
+      - name: Install Python
+        run: uv python install 3.13
+      - name: Resolve locked environment
+        run: uv sync --locked --python 3.13
+      - name: Assert effective Python interpreter
+        run: uv run --locked python scripts/assert-python-version.py 3.13
+      - name: Verify lock freshness
+        run: uv lock --check
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+      - name: Build documentation
+        run: uv run --locked zensical build --clean
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v5
