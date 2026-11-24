@@ -38,6 +38,8 @@ jobs:
         uses: actions/configure-pages@v6
       - name: Build documentation
         run: uv run --locked zensical build --clean
+      - name: Verify generated documentation files
+        run: uv run --locked python scripts/check-docs-output.py
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:

@@ -10,14 +10,17 @@ uv lock --check
 uv sync --locked
 uv run --locked ruff check .
 uv run --locked ruff format --check .
-uv run --locked mypy circuit_ci
+uv run --locked mypy circuit_ci scripts/check-docs-output.py
 uv run --locked pytest --randomly-seed=42 --cov=circuit_ci --cov-branch --cov-report=term-missing
 uv run --locked zensical build --clean
+uv run --locked python scripts/check-docs-output.py
 uv build
 ```
 
 The documentation build uses strict internal Markdown link and anchor
-validation. Generated pages are in `site/`. Preview locally with
+validation. The output check additionally verifies generated local file
+links and the required published YAML example, without fetching external URLs.
+Generated pages are in `site/`. Preview locally with
 `uv run --locked zensical serve`. Neither link validation nor a successful
 Python test establishes electrical correctness.
 

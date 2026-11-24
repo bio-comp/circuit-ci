@@ -46,10 +46,11 @@ uv run --locked circuitci --help
 uv run --locked cci docs/example_state_psu.yaml --pack psu
 uv run --locked ruff check .
 uv run --locked ruff format --check .
-uv run --locked mypy circuit_ci
+uv run --locked mypy circuit_ci scripts/check-docs-output.py
 uv run --locked pytest --randomly-seed=42
 uv run --locked pytest --randomly-seed=42 --cov=circuit_ci --cov-branch --cov-report=term-missing
 uv run --locked zensical build --clean
+uv run --locked python scripts/check-docs-output.py
 uv build
 ```
 
@@ -88,8 +89,9 @@ Build the maintained Zensical site locally with
 `uv run --locked zensical build --clean` (output: `site/`).
 See [documentation home](docs/index.md) and the
 [development and review contract](docs/development.md). The intended public
-site is https://bio-comp.github.io/circuit-ci/; a successful local build
-is not evidence of public deployment.
+site is https://bio-comp.github.io/circuit-ci/. The output checker rejects
+missing local file targets and a missing or changed published YAML example;
+a successful local build is not evidence of public deployment.
 
 ## Engineering roadmap
 

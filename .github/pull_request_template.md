@@ -12,7 +12,7 @@ Issue:
 - Paths inspected:
 - Documentation changes (or evidence-based no-change rationale):
 - Examples, CLI behavior and schema/contract claims checked against implementation:
-- Local `uv run --locked zensical build --clean` result:
+- Local `uv run --locked zensical build --clean` and output-check results:
 - Observed PR `documentation` check result and run link (pending until emitted):
 
 - [ ] Documentation audit is recorded, and the documentation build and PR check pass.

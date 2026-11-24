@@ -21,7 +21,7 @@ COMMANDS: tuple[tuple[str, ...], ...] = (
     ("uv", "sync", "--locked"),
     ("uv", "run", "--locked", "ruff", "check", "."),
     ("uv", "run", "--locked", "ruff", "format", "--check", "."),
-    ("uv", "run", "--locked", "mypy", "circuit_ci"),
+    ("uv", "run", "--locked", "mypy", "circuit_ci", "scripts/check-docs-output.py"),
     (
         "uv",
         "run",
@@ -35,6 +35,7 @@ COMMANDS: tuple[tuple[str, ...], ...] = (
     ("uv", "run", "--locked", "cci", "--help"),
     ("uv", "run", "--locked", "circuitci", "--help"),
     ("uv", "run", "--locked", "zensical", "build", "--clean"),
+    ("uv", "run", "--locked", "python", "scripts/check-docs-output.py"),
     ("uv", "build"),
 )
 
