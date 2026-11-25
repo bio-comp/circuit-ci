@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Severity(str, Enum):
@@ -19,7 +19,7 @@ class Status(str, Enum):
     HARD_FAIL = "HARD_FAIL"
     CONFLICT_REQUIRES_REVIEW = "CONFLICT_REQUIRES_REVIEW"
     MISSING_DATA = "MISSING_DATA"
-    MARGINAL_REVIEW = "MARGINAL_REVIEW"  # reserved for staging-based uncertainty
+    MARGINAL_REVIEW = "MARGINAL_REVIEW"  # soft findings require review
 
 
 class ComponentFact(BaseModel):
@@ -32,6 +32,13 @@ class ComponentFact(BaseModel):
     max_power_watts: Optional[float] = None
     notes: Optional[str] = None
 
+    @field_validator("value", "max_voltage", "max_power_watts", mode="before")
+    @classmethod
+    def reject_boolean_electrical_values(cls, value: object) -> object:
+        if isinstance(value, bool):
+            raise ValueError("boolean is not an electrical value")
+        return value
+
 
 class CircuitConstraints(BaseModel):
     vin_v: Optional[float] = None
@@ -42,6 +49,45 @@ class CircuitConstraints(BaseModel):
     target_gain_db: Optional[float] = None
     target_fc_hz: Optional[float] = None
     min_phase_margin_deg: Optional[float] = None
+
+    @field_validator("vin_v", mode="before")
+    @classmethod
+    def reject_boolean_voltage(cls, value: object) -> object:
+        if isinstance(value, bool):
+            raise ValueError("boolean is not a voltage")
+        return value
+
+
+class ScopedEvidence(BaseModel):
+    """Caller-supplied, not independently authenticated, rule evidence."""
+
+    model_config = ConfigDict(
+        extra="forbid", strict=True, str_strip_whitespace=True, validate_assignment=True
+    )
+    source: str = Field(min_length=1)
+
+
+class DividerEvidence(ScopedEvidence):
+    topology: Literal["ideal_unloaded_series_r1_r2_across_vin"]
+
+
+class OutputCapEvidence(ScopedEvidence):
+    # Only a steady DC operating point, not a target or transient envelope.
+    dc_voltage_v: float = Field(ge=0, allow_inf_nan=False)
+
+
+class OpampEvidence(ScopedEvidence):
+    # Scope: all required decoupling and DC bias-return paths of this op amp.
+    decoupling: Literal["connected", "absent", "unknown"] = "unknown"
+    decoupling_capacitors: list[str] = Field(default_factory=list)
+    bias_return: Literal["present", "absent", "unknown"] = "unknown"
+
+
+class RuleEvidence(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, validate_assignment=True)
+    divider: DividerEvidence | None = None
+    output_cap: OutputCapEvidence | None = None
+    opamps: dict[str, OpampEvidence] = Field(default_factory=dict)
 
 
 class CircuitState(BaseModel):
@@ -57,6 +103,7 @@ class CircuitState(BaseModel):
     netlist_graph: Dict[str, List[str]] = Field(default_factory=dict)
 
     missing_prerequisites: List[str] = Field(default_factory=list)
+    rule_evidence: RuleEvidence = Field(default_factory=RuleEvidence)
 
 
 class CircuitEdit(BaseModel):

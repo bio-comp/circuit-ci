@@ -19,8 +19,9 @@ Unrecognized rule-pack names and invalid/missing inputs are CLI errors.
 `{"status": "HARD_FAIL", ...}` while the process exits **0**. This makes
 `cci` a *JSON reporter*, not a safe shell/CI policy gate: `set -e` and
 a passing command exit status do not mean the design passed. Consumers must
-parse and evaluate the JSON verdict themselves, remembering that the inherited
-rules/statuses are not design-qualified. The future reporter-vs-gate semantics
+parse and evaluate the JSON verdict themselves. The illustrative YAML above
+returns MISSING_DATA because it supplies no scoped rule evidence. See the
+[rule evidence contract](01_architecture.md); statuses are not design-qualified. The future reporter-vs-gate semantics
 and fail-closed exit contract belong to
 [issue #12](https://github.com/bio-comp/circuit-ci/issues/12);
 the current documentation does not change CLI exit-code behavior.

@@ -15,9 +15,7 @@ def test_psu_goldens():
         st = CircuitState.model_validate(c["state"])
         res = lint_psu(st)
         assert res.status.value == c["expect"]["status"], c["id"]
-        got = {f.rule_id for f in res.findings}
-        for rule in c["expect"]["rules"]:
-            assert rule in got, (c["id"], got)
+        assert [f.rule_id for f in res.findings] == c["expect"]["rules"], c["id"]
 
 
 def test_opamp_goldens():
@@ -26,6 +24,4 @@ def test_opamp_goldens():
         st = CircuitState.model_validate(c["state"])
         res = lint_opamp(st)
         assert res.status.value == c["expect"]["status"], c["id"]
-        got = {f.rule_id for f in res.findings}
-        for rule in c["expect"]["rules"]:
-            assert rule in got, (c["id"], got)
+        assert [f.rule_id for f in res.findings] == c["expect"]["rules"], c["id"]

@@ -8,10 +8,10 @@ that Circuit-CI currently qualifies hardware.
 - Pydantic v2 `CircuitState`, `ProposedChange`, `Finding`, `LinterResult`,
   `AuditPacket`, and `MeasurementPlan` **schemas**
 - Two deterministic but **unqualified** rule packs (PSU and op-amp)
-- Legacy finding/status aggregation and a Typer CLI that emits result JSON
-- Four legacy golden examples exercised by two pytest test functions
+- Fail-closed finding/status aggregation and a Typer CLI that emits result JSON
+- Four legacy golden examples and scoped rule regression tests
 
-These checks have known unsafe assumptions; neither `AUTO_PASS` nor a passing
+The checks depend on caller-supplied evidence and narrow assumptions; neither `AUTO_PASS` nor a passing
 golden example is evidence of electrical design verification. See
 [issue #2](https://github.com/bio-comp/circuit-ci/issues/2).
 
