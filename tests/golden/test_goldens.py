@@ -1,9 +1,8 @@
 import yaml
 
-from circuit_ci.core.schemas import Status
-from circuit_ci.packs.psu.pack import lint as lint_psu
-from circuit_ci.packs.opamp.pack import lint as lint_opamp
 from circuit_ci.core.schemas import CircuitState
+from circuit_ci.packs.opamp.pack import lint as lint_opamp
+from circuit_ci.packs.psu.pack import lint as lint_psu
 
 
 def _load(path: str):

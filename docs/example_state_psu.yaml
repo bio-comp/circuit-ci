@@ -1,3 +1,8 @@
+# Illustrative input for the legacy CLI only. This is NOT a verified circuit.
+# No pin-to-net connectivity, loading, or voltage drops are represented.
+# The "12V to 5V divider" design_intent is a label, NOT an established topology.
+# Do not treat a HARD_FAIL or AUTO_PASS result as an electrical sign-off.
+# CLI process exit may be 0 even when result JSON reports HARD_FAIL (issue #12).
 design_intent: "12V to 5V divider"
 version: "demo-1"
 constraints:

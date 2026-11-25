@@ -24,7 +24,7 @@ def lint(
     state: Path = typer.Argument(..., exists=True, readable=True, help="CircuitState YAML"),
     pack: str = typer.Option("psu", help="Pack: psu | opamp"),
     out: Optional[Path] = typer.Option(None, help="Write JSON result to file"),
-):
+) -> None:
     """Run deterministic lint checks."""
     st = _load_state(state)
     if pack == "psu":
@@ -43,5 +43,5 @@ def lint(
         typer.echo(text)
 
 
-def main():
+def main() -> None:
     app()

@@ -1,0 +1,24 @@
+default_install_hook_types: [pre-commit, pre-push]
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff staged lint
+        entry: uv run --locked ruff check --no-fix
+        language: system
+        types_or: [python, pyi]
+        stages: [pre-commit]
+      - id: ruff-format
+        name: Ruff staged format check
+        entry: uv run --locked ruff format --check
+        language: system
+        types_or: [python, pyi]
+        stages: [pre-commit]
+      - id: full-local-gate
+        name: Verify clean current HEAD before push
+        entry: uv run --locked python scripts/check-before-push.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [pre-push]
