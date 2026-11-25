@@ -23,7 +23,7 @@ parse and evaluate the JSON verdict themselves, remembering that the inherited
 rules/statuses are not design-qualified. The future reporter-vs-gate semantics
 and fail-closed exit contract belong to
 [issue #12](https://github.com/bio-comp/circuit-ci/issues/12);
-**no CLI exit-code behavior is changed in PR #11**.
+the current documentation does not change CLI exit-code behavior.
 
 Planned, not implemented: `cci lint`, `cci verify`, and `cci report`.
 Applying `ProposedChange`, running SPICE, and creating a measurement plan

@@ -46,9 +46,11 @@ uv run --locked circuitci --help
 uv run --locked cci docs/example_state_psu.yaml --pack psu
 uv run --locked ruff check .
 uv run --locked ruff format --check .
-uv run --locked mypy circuit_ci
+uv run --locked mypy circuit_ci scripts/check-docs-output.py
 uv run --locked pytest --randomly-seed=42
 uv run --locked pytest --randomly-seed=42 --cov=circuit_ci --cov-branch --cov-report=term-missing
+uv run --locked zensical build --clean
+uv run --locked python scripts/check-docs-output.py
 uv build
 ```
 
@@ -72,7 +74,7 @@ install` **alone is insufficient**: the full pre-push gate fails closed if
 the ref-set guard is missing. The guard accepts only a clean current-HEAD
 single branch push; tags, deletions, additional refs and non-HEAD sources
 are rejected, not silently skipped. For outgoing commits that require checking, prek then runs the full local
-Ruff/mypy/pytest/coverage/packaging gate. Prek can skip that full stage when
+Ruff/mypy/pytest/coverage/documentation/packaging gate. Prek can skip that full stage when
 Git recognizes all commits as already present on the remote; the legacy guard
 still independently validates the complete ref set and clean worktree.
 Hooks can be bypassed and are not a security boundary; GitHub CI independently
@@ -80,6 +82,16 @@ runs the quality gates.
 
 The CI matrix sets `UV_PYTHON` for every uv operation and asserts the
 **actual** interpreter rather than trusting the matrix job label.
+
+## Documentation
+
+Build the maintained Zensical site locally with
+`uv run --locked zensical build --clean` (output: `site/`).
+See [documentation home](docs/index.md) and the
+[development and review contract](docs/development.md). The intended public
+site is https://bio-comp.github.io/circuit-ci/. The output checker rejects
+missing local file targets and a missing or changed published YAML example;
+a successful local build is not evidence of public deployment.
 
 ## Engineering roadmap
 

@@ -35,7 +35,7 @@ jobs:
       - name: Format
         run: uv run --locked ruff format --check .
       - name: Type check
-        run: uv run --locked mypy circuit_ci
+        run: uv run --locked mypy circuit_ci scripts/check-docs-output.py
       - name: Test and branch coverage
         run: uv run --locked pytest --randomly-seed=42 --cov=circuit_ci --cov-branch --cov-report=term-missing
       - name: Verify CLI entrypoints
@@ -44,3 +44,30 @@ jobs:
           uv run --locked circuitci --help
       - name: Build
         run: uv build --python ${{ matrix.python-version }}
+
+  documentation:
+    name: documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      UV_PYTHON: "3.13"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: false
+      - name: Install Python
+        run: uv python install 3.13
+      - name: Resolve locked environment
+        run: uv sync --locked --python 3.13
+      - name: Assert effective Python interpreter
+        run: uv run --locked python scripts/assert-python-version.py 3.13
+      - name: Verify lock freshness
+        run: uv lock --check
+      - name: Build documentation
+        run: uv run --locked zensical build --clean
+      - name: Verify generated documentation files
+        run: uv run --locked python scripts/check-docs-output.py

@@ -1,0 +1,24 @@
+[project]
+site_name = "Circuit-CI"
+site_description = "Experimental electronics feasibility and verification software"
+site_url = "https://bio-comp.github.io/circuit-ci/"
+repo_url = "https://github.com/bio-comp/circuit-ci"
+repo_name = "bio-comp/circuit-ci"
+docs_dir = "docs"
+site_dir = "site"
+strict = true
+nav = [
+  { "Home" = "index.md" },
+  { "Thesis and scope" = "00_thesis.md" },
+  { "Architecture" = "01_architecture.md" },
+  { "CLI reference" = "02_cli.md" },
+  { "Benchmarks and evidence" = "03_benchmarks.md" },
+  { "Development and review" = "development.md" },
+]
+
+[project.validation]
+invalid_links = true
+invalid_link_anchors = true
+
+[project.theme]
+font = false
