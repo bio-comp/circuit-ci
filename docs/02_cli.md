@@ -27,8 +27,10 @@ each referenced mapping is checked before safe construction. Merge keys
 collection tags such as `!!omap`, `!!pairs` and `!!set` are rejected.
 A quoted literal string key `"<<"` is not a merge instruction.
 
-Ambiguous or malformed YAML is an input error (exit 2, diagnostic on stderr,
-no verdict JSON). No output file is created or overwritten on input
+Ambiguous mappings, YAML syntax errors, invalid UTF-8, and malformed
+scalar values that fail safe construction are input errors (exit 2,
+diagnostic on stderr, no verdict JSON). Supported explicitly tagged scalars
+retain PyYAML's safe conversion semantics. No output file is created or overwritten on input
 validation failure; an existing file is unchanged and must not be mistaken
 for a result of the failed invocation. Safe construction is followed by
 the existing Pydantic state validation, including strict nested evidence

@@ -8,9 +8,11 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 from pydantic import ValidationError
 from typer.testing import CliRunner
 
+import circuit_ci.cli.app as cli_module
 from circuit_ci.cli.app import app
 
 PSU = """design_intent: synthetic
@@ -173,3 +175,196 @@ def test_installed_cli_never_publishes_ambiguous_result(
     assert result.returncode == 2, result.stderr
     assert result.stdout == ""
     assert output.read_bytes() == sentinel
+
+
+MALFORMED_SCALARS = [
+    b"!!int not_a_number",
+    b"!!float not_a_number",
+    b"!!bool perhaps",
+    b"!!int ''",
+    b"!!float ''",
+    b"!!timestamp not-a-date",
+    b"!!timestamp 2026-02-31",
+    b"!!int '+'",
+    b"!!int '_'",
+    b"!!float '_'",
+    b"!!float '+'",
+    b"!!int 0b",
+    b"!!int 0x",
+    b"!!timestamp 2026-01-01T12:00:00+99:00",
+    b"2026-02-31",  # implicitly resolved invalid date
+    b"!!float " + b":".join([b"1"] * 180),
+    b"&invalid !!bool perhaps",  # referenced by an alias below
+]
+MALFORMED_BYTES = [
+    PSU.encode("utf-8")
+    + b"ignored: "
+    + scalar
+    + b"\n"
+    + (b"ignored_alias: *invalid\n" if scalar.startswith(b"&invalid") else b"")
+    for scalar in MALFORMED_SCALARS
+] + [PSU.encode("utf-8") + b"ignored: \xff\n"]
+
+
+@pytest.mark.parametrize("entrypoint", ["cci", "circuitci"])
+@pytest.mark.parametrize("document", MALFORMED_BYTES)
+def test_malformed_scalar_or_encoding_is_controlled_cli_error(
+    tmp_path: Path, entrypoint: str, document: bytes
+) -> None:
+    path = tmp_path / "state.yaml"
+    path.write_bytes(document)
+    output = tmp_path / "result.json"
+    executable = Path(sys.executable).with_name(entrypoint)
+    args = [str(executable), str(path), "--pack", "psu"]
+
+    def invoke(extra: list[str]) -> None:
+        result = subprocess.run([*args, *extra], capture_output=True, check=False)
+        assert result.returncode == 2, result.stderr
+        assert result.stdout == b""
+        assert b"Traceback" not in result.stderr
+        expected = b"valid UTF-8" if b"\xff" in document else b"invalid YAML scalar"
+        assert expected in result.stderr
+
+    invoke([])
+    invoke(["--out", str(output)])
+    assert not output.exists()
+    sentinel = b"prior result must survive"
+    output.write_bytes(sentinel)
+    invoke(["--out", str(output)])
+    assert output.read_bytes() == sentinel
+
+
+@pytest.mark.parametrize(
+    ("pack", "document", "status"),
+    [
+        (
+            "psu",
+            PSU.replace("vin_v: 12", "vin_v: !!int 12").replace(
+                "dc_voltage_v: 15", "dc_voltage_v: !!float 15"
+            ),
+            "AUTO_PASS",
+        ),
+        (
+            "psu",
+            PSU.replace("dc_voltage_v: 15", "dc_voltage_v: !!float 17.0"),
+            "HARD_FAIL",
+        ),
+        (
+            "opamp",
+            OPAMP + "generated_at: !!timestamp 2026-11-26T12:00:00Z\nignored: !!bool TRUE\n",
+            "AUTO_PASS",
+        ),
+        (
+            "opamp",
+            OPAMP.replace("bias_return: present", "bias_return: absent")
+            + "generated_at: !!timestamp 2026-11-26T12:00:00+01:00\n"
+            "ignored: !!bool off\n",
+            "HARD_FAIL",
+        ),
+        (
+            "psu",
+            PSU.replace("vin_v: 12", "vin_v: !!int 0xC").replace(
+                "dc_voltage_v: 15", "dc_voltage_v: !!float 1.5e1"
+            )
+            + "ignored: !!timestamp 2026-11-26\n",
+            "AUTO_PASS",
+        ),
+    ],
+)
+def test_valid_explicit_scalar_tags(tmp_path: Path, pack: str, document: str, status: str) -> None:
+    path = tmp_path / "state.yaml"
+    path.write_bytes(document.encode("utf-8"))
+    result = runner.invoke(app, [str(path), "--pack", pack])
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout)["status"] == status
+    if "generated_at:" in document:
+        state = cli_module._load_state(path)
+        assert state.generated_at.year == 2026
+        assert state.generated_at.tzinfo is not None
+
+
+def test_valid_tagged_bool_still_fails_strict_electrical_validation(tmp_path: Path) -> None:
+    path = tmp_path / "state.yaml"
+    path.write_bytes(PSU.replace("dc_voltage_v: 15", "dc_voltage_v: !!bool true").encode())
+    result = runner.invoke(app, [str(path)])
+    assert isinstance(result.exception, ValidationError)
+    assert result.exit_code == 1
+    assert result.stdout == ""
+
+
+@pytest.mark.parametrize(
+    ("method", "scalar", "error"),
+    [
+        ("construct_yaml_int", "!!int 12", IndexError("unexpected index error")),
+        ("construct_yaml_float", "!!float 15", RuntimeError("unexpected runtime error")),
+        ("construct_yaml_bool", "!!bool true", KeyError("unexpected missing key")),
+        ("construct_yaml_timestamp", "!!timestamp 2026-11-26", AttributeError("unexpected")),
+    ],
+)
+def test_unexpected_scalar_constructor_failure_propagates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method: str, scalar: str, error: Exception
+) -> None:
+    path = tmp_path / "state.yaml"
+    path.write_bytes((PSU + f"ignored: {scalar}\n").encode())
+
+    def fail(*args: object, **kwargs: object) -> None:
+        raise error
+
+    monkeypatch.setattr(yaml.SafeLoader, method, fail)
+    result = runner.invoke(app, [str(path)])
+    assert result.exception is error
+    assert result.exit_code == 1
+    assert result.stdout == ""
+
+
+@pytest.mark.parametrize(
+    ("target", "method", "error"),
+    [
+        (yaml.SafeLoader, "construct_document", ValueError("internal construction bug")),
+        (yaml.SafeLoader, "get_single_node", KeyError("internal composition bug")),
+        (cli_module, "_check_yaml_nodes", IndexError("internal node check bug")),
+        (cli_module.CircuitState, "model_validate", yaml.YAMLError("internal model bug")),
+        (cli_module, "lint_psu", ValueError("internal rule bug")),
+        (Path, "write_text", ValueError("internal persistence bug")),
+    ],
+)
+def test_unexpected_non_scalar_failure_propagates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, target: object, method: str, error: Exception
+) -> None:
+    path = tmp_path / "state.yaml"
+    path.write_bytes(PSU.encode())
+
+    def fail(*args: object, **kwargs: object) -> None:
+        raise error
+
+    monkeypatch.setattr(target, method, fail)
+    result = runner.invoke(app, [str(path), "--out", str(tmp_path / "result.json")])
+    assert result.exception is error
+    assert result.exit_code == 1
+    assert result.stdout == ""
+    assert not (tmp_path / "result.json").exists()
+
+
+@pytest.mark.parametrize("document", [PSU.encode(), MALFORMED_BYTES[0], MALFORMED_BYTES[2]])
+def test_loader_is_disposed_after_scalar_construction(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, document: bytes
+) -> None:
+    path = tmp_path / "state.yaml"
+    path.write_bytes(document)
+    disposed = []
+    original = yaml.SafeLoader.dispose
+
+    def dispose(loader: yaml.SafeLoader) -> None:
+        disposed.append(loader)
+        original(loader)
+
+    monkeypatch.setattr(yaml.SafeLoader, "dispose", dispose)
+    result = runner.invoke(app, [str(path)])
+    assert result.exit_code == (0 if document == PSU.encode() else 2)
+    assert len(disposed) == 1
+
+
+def test_scalar_adapters_do_not_change_global_safe_loader() -> None:
+    # PyYAML's original registry must remain untouched.
+    with pytest.raises(KeyError):
+        yaml.safe_load("!!bool perhaps")
