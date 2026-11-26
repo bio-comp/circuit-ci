@@ -105,10 +105,10 @@ are **legacy software outputs**, not stages of engineering qualification.
 
 ## Research inputs
 
-For consequential Electronics Lab work, read the live Drive registry
-(`1vVVQUNZe_9UWPLld02ALrwI66AlIUcJm`) and source index
-(`1aq9dBhzZzAZbl-1AmY1jzcwMg3FY9Zi6`) before selecting sources.
-Read the shared inventory (`1eoAN3o93C-16z64qaKK5SCB4OMo3Xf_i`) when
+For consequential Electronics Lab work, resolve the exact live Drive objects
+from the authorized private Project configuration. Read
+`PROJECT_CANONICAL_FILES.md` and the registered `SOURCE_INDEX.md` before
+selecting sources. Read the registered `electronics_lab_setup.md` when
 ownership or capability matters, then the registered build document when relevant.
 Use the source index's applicability rules and access routes. The
 [offline research coverage command](docs/03_benchmarks.md#research-coverage-command)
