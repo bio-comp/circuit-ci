@@ -1,3 +1,4 @@
+# Legacy software inputs: names and intent do not establish connectivity.
 - id: OP-01-ac-coupled-missing-bias
   pack: opamp
   state:
@@ -8,8 +9,8 @@
       U1: {part_id: "U1", kind: "opamp", value: "OPA1656"}
       CDEC: {part_id: "CDEC", kind: "capacitor", value: "100nF", max_voltage: 16.0}
   expect:
-    status: HARD_FAIL
-    rules: ["OPAMP_INPUT_BIAS_RETURN_MISSING"]
+    status: MISSING_DATA
+    rules: ["OPAMP_BIAS_RETURN_UNKNOWN", "OPAMP_DECOUPLING_UNKNOWN"]
 
 - id: OP-02-missing-decoupling
   pack: opamp
@@ -20,5 +21,5 @@
     components:
       U1: {part_id: "U1", kind: "opamp", value: "OPA1656"}
   expect:
-    status: CONFLICT_REQUIRES_REVIEW
-    rules: ["OPAMP_DECOUPLING_MISSING"]
+    status: MISSING_DATA
+    rules: ["OPAMP_BIAS_RETURN_UNKNOWN", "OPAMP_DECOUPLING_UNKNOWN"]

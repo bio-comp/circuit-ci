@@ -39,7 +39,11 @@ def test_cli_emits_parseable_json_without_diagnostics() -> None:
     parsed = json.loads(result.stdout)
     assert parsed["audit"]["pack_id"] == "electronics_psu"
     assert parsed["audit"]["state_version"] == "demo-1"
-    assert isinstance(parsed["findings"], list)
+    assert parsed["status"] == "MISSING_DATA"
+    assert [f["rule_id"] for f in parsed["findings"]] == [
+        "PSU_DIVIDER_TOPOLOGY_UNKNOWN",
+        "PSU_CAP_VOLTAGE_UNKNOWN",
+    ]
 
 
 def test_cli_writes_result_file(tmp_path: Path) -> None:
@@ -69,3 +73,22 @@ def test_cli_rejects_invalid_state(tmp_path: Path) -> None:
     invalid.write_text("design_intent: incomplete\n", encoding="utf-8")
     result = runner.invoke(app, [str(invalid)])
     assert result.exit_code != 0
+
+
+def test_cli_hard_fail_remains_json_reporter(tmp_path: Path) -> None:
+    fixture = tmp_path / "hard.yaml"
+    fixture.write_text(
+        """design_intent: synthetic DC voltage fixture
+version: cli-hard
+components:
+  COUT: {part_id: COUT, kind: capacitor, value: 470uF, max_voltage: 10}
+rule_evidence:
+  output_cap: {dc_voltage_v: 13.8, source: synthetic DC terminal voltage}
+""",
+        encoding="utf-8",
+    )
+    result = runner.invoke(app, [str(fixture), "--pack", "psu"])
+    assert result.exit_code == 0, result.output
+    parsed = json.loads(result.stdout)
+    assert parsed["status"] == "HARD_FAIL"
+    assert [f["severity"] for f in parsed["findings"]] == ["MISSING_DATA", "HARD"]

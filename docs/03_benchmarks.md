@@ -9,9 +9,16 @@ their expected rule identifiers and aggregate statuses. These tests exercise
 the *existing software outputs*, not circuit topology correctness, calibrated
 measurement results, or agreement with physical hardware.
 
-The PSU legacy cases include an unsupported `Vin²/R1` dissipation
-assumption. A passing test may therefore preserve an unsafe behavior; see
-[issue #2](https://github.com/bio-comp/circuit-ci/issues/2).
+The four original input states are preserved. Their legacy expected outcomes
+were corrected to MISSING_DATA: PSU-01 had assumed full input voltage across
+R1, PSU-02 inferred terminal voltage from a target, OP-01 inferred missing
+bias return from a name, and OP-02 inferred absent decoupling from an incomplete
+component list. Expected findings are now checked exactly and in order.
+The new `tests/test_rule_safety.py` suite independently exercises explicit
+conditional clean/overstress/unknown cases, precedence, malformed values,
+and deterministic findings, including the 12 V ideal divider counterexample
+and a generated rating-order property test. See the
+[rule evidence contract](01_architecture.md) for sources and limitations.
 
 ## Proposed comparative benchmark — not performed
 

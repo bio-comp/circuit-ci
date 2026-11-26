@@ -8,12 +8,12 @@ establish electrical safety or functional correctness.
 
 The current foundation provides Pydantic circuit-state and result models,
 experimental PSU and op-amp rule packs, the `cci` and `circuitci` JSON
-reporters, and four legacy golden examples. The development environment uses
+reporters, four legacy golden examples and scoped rule regression tests. The development environment uses
 uv, Ruff, mypy, pytest with branch coverage, and prek.
 
 Start with the [CLI reference](02_cli.md) and the
 [illustrative YAML input](example_state_psu.yaml). Do not energize or build
-a circuit based on this example. A JSON `HARD_FAIL` can still return process
+a circuit based on this example; it returns MISSING_DATA. A JSON `HARD_FAIL` can still return process
 exit code zero; see [issue #12](https://github.com/bio-comp/circuit-ci/issues/12).
 
 ## What is not available

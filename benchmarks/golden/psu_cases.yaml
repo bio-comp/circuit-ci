@@ -1,3 +1,4 @@
+# Legacy software inputs: no topology or operating-point evidence.
 - id: PSU-01-divider-meltdown
   pack: psu
   state:
@@ -10,8 +11,8 @@
       R1: {part_id: "R1", kind: "resistor", value: 100, max_power_watts: 0.25}
       R2: {part_id: "R2", kind: "resistor", value: 100, max_power_watts: 0.25}
   expect:
-    status: HARD_FAIL
-    rules: ["PSU_RATING_RESISTOR_WATTAGE"]
+    status: MISSING_DATA
+    rules: ["PSU_DIVIDER_TOPOLOGY_UNKNOWN", "PSU_CAP_VOLTAGE_UNKNOWN"]
 
 - id: PSU-02-cap-underrated
   pack: psu
@@ -24,5 +25,5 @@
     components:
       COUT: {part_id: "COUT", kind: "capacitor", value: "470uF", max_voltage: 10.0}
   expect:
-    status: HARD_FAIL
-    rules: ["PSU_RATING_CAP_VOLTAGE"]
+    status: MISSING_DATA
+    rules: ["PSU_DIVIDER_TOPOLOGY_UNKNOWN", "PSU_CAP_VOLTAGE_UNKNOWN"]

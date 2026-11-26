@@ -4,12 +4,14 @@
 electronics feasibility and verification. It preserves the original design:
 typed `CircuitState`, rule packs, findings, an audit record, and the `cci` CLI.
 
-**NOT DESIGN-QUALIFIED.** The inherited PSU pack assumes voltage across a
-resistor without establishing connectivity, and finding aggregation can
-prioritize missing data over a hard failure. The op-amp pack uses component
-names as proxy evidence of topology. Do **not** interpret `AUTO_PASS` or
-a passing golden fixture as electrical safety or functional correctness.
-See [rule safety issue #2](https://github.com/bio-comp/circuit-ci/issues/2).
+**NOT DESIGN-QUALIFIED.** The PSU and op-amp packs now require explicit,
+scoped caller-supplied evidence; unsupported or incomplete checks return
+`MISSING_DATA`. Confirmed violations within supported declared conditions
+take precedence over missing evidence. `AUTO_PASS` means only that all
+mandatory checks in the selected experimental pack completed without findings,
+not that a circuit is safe or functional. See the
+[rule evidence contract](docs/01_architecture.md) and
+[rule safety issue #2](https://github.com/bio-comp/circuit-ci/issues/2).
 The `ProposedChange` argument is accepted but **not applied**; see
 [contract issue #3](https://github.com/bio-comp/circuit-ci/issues/3).
 
@@ -18,7 +20,7 @@ The `ProposedChange` argument is accepted but **not applied**; see
 - Pydantic v2 circuit-state and result models
 - Experimental PSU and op-amp rule packs (not physically qualified)
 - Typer `cci` and `circuitci` CLI entry points
-- Two pytest golden-test functions covering four legacy examples
+- Four legacy examples plus deterministic conditional-rule regressions
 
 **Not implemented:** connectivity-aware analysis, architecture-feasibility
 qualification, applied edits, DigiKey/KiCad Happy integration, SPICE execution,
@@ -31,6 +33,12 @@ success. In particular, a JSON `HARD_FAIL` verdict can return shell exit code
 policy; it must not use the current CLI as a fail-closed design gate. The
 reporter/gate exit contract is owned by
 [issue #12](https://github.com/bio-comp/circuit-ci/issues/12).
+Invalid or ambiguous YAML is rejected before rule evaluation; no result is
+written. Mapping keys must be unique strings and YAML merge keys are
+unsupported. See the [CLI YAML input contract](docs/02_cli.md#yaml-input-contract)
+for alias handling, rejected constructs, and remaining outer-state validation
+limitations (#3).
+
 The original `staging` and `telemetry` files are placeholders.
 
 ## Reproducible development
