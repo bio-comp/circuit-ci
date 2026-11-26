@@ -36,6 +36,17 @@ the status and animation pages without network credentials. It does not request
 Proxmox data. The USB setup page only sends credentials to the selected serial
 device; its on-device settings are not encrypted by this example.
 
+## Model an optional Proxmox guest card
+
+Run `node examples/build_cases/companion/tests/proxmox/check.mjs` for 12 synthetic
+cases. The model counts visible QEMU and LXC guests, categorizes unknown statuses
+and distinguishes an empty visible set from access, transport, service, schema
+or freshness errors. The 60-second freshness window is a display policy. An
+empty visible set cannot establish how many guests a cluster has. Transport
+trust, HTTP status and data age are supplied by the fixture. This model performs
+no API request or certificate validation and is separate from the firmware's
+three current pages.
+
 ## Compile the SPD reader
 
 The sketch targets Seeed XIAO ESP32-C5 and an SSD1306 128×64 OLED at address

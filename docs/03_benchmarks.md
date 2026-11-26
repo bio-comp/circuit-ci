@@ -49,7 +49,10 @@ uv run --locked python examples/build_cases/replay.py
 The display parser requires three distinct IPv4 configuration fields. The sketch
 accepts a reading only after the UART modem completes its response. Its U138 source
 describes its own interface. Cached addresses do not establish a live route or
-visibility into other switch ports. The SPD reader exercises page selection, read
+visibility into other switch ports. An offline Proxmox guest-card oracle checks permission-filtered synthetic responses
+and a 60-second freshness boundary. Its transport result and status are test
+inputs. It performs no network I/O and adds no telemetry screen to the device.
+The SPD reader exercises page selection, read
 pointers, two full reads and two CRCs. Its synthetic 4,096 MiB, 1Rx8 fixture declares
 833 ps tCK. Its DRAM array remains untested even when every host assertion passes.
 

@@ -7,3 +7,4 @@ trap 'rm -rf "$tempdir"' EXIT
 "$tempdir/check_report"
 bash spd/tests/run.sh
 (cd companion && node tests/check_setup.mjs)
+node companion/tests/proxmox/check.mjs
