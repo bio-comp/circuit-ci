@@ -1,4 +1,7 @@
+// The Arduino core defines bit(b) before loading the sketch headers.
+#define bit(b) (1UL << (b))
 #include "../reader/spd.hpp"
+#undef bit
 #include <algorithm>
 #include <array>
 #include <cassert>

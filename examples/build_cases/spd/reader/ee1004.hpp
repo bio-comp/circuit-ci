@@ -17,7 +17,7 @@ template<class Pins> class SerialBus {
         io.half_period();
         return true;
     }
-    bool bit(bool release, bool& observed) {
+    bool sample_bit(bool release, bool& observed) {
         io.sda(release); io.half_period();
         if (!clock_high()) return false;
         observed = io.data_level();
@@ -42,19 +42,19 @@ public:
         bool sampled = false;
         for (uint8_t mask = 128; mask != 0; mask >>= 1) {
             const bool one = (byte & mask) != 0;
-            if (!bit(one, sampled) || sampled != one) return Reply::fault;
+            if (!sample_bit(one, sampled) || sampled != one) return Reply::fault;
         }
-        if (!bit(true, sampled)) return Reply::fault;
+        if (!sample_bit(true, sampled)) return Reply::fault;
         return sampled ? Reply::nack : Reply::ack;
     }
     bool receive(uint8_t& value, bool more) {
         value=0;
         bool sampled=false;
         for (unsigned i=0; i<8; ++i) {
-            if (!bit(true,sampled)) return false;
+            if (!sample_bit(true,sampled)) return false;
             value = static_cast<uint8_t>((value << 1) | (sampled ? 1 : 0));
         }
-        return bit(!more,sampled) && sampled == !more;
+        return sample_bit(!more,sampled) && sampled == !more;
     }
 };
 

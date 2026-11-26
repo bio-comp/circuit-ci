@@ -56,7 +56,7 @@ isolated sketchbook, with the Espressif package index configured.
 ```bash
 arduino-cli core install esp32:esp32@3.3.5
 arduino-cli lib install U8g2@2.35.30
-arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32C5 examples/build_cases/spd/reader
+arduino-cli compile --warnings all --fqbn esp32:esp32:XIAO_ESP32C5 examples/build_cases/spd/reader
 ```
 
 Inspect `reader.ino` for the two separate buses and button assignment. The example
@@ -73,3 +73,16 @@ nonvolatile data write or write-protection command. Page selection and address
 pointer transactions use I²C write direction on the wire. Manufacturer IDs and
 module serial data on the second page do not have those CRCs. Declared timing
 and capacity are metadata; there is no memory-cell read/write test.
+
+## Target compile observations
+
+| Target with the versions above | Program bytes | Reported global bytes | SHA-256 of observed application binary |
+| --- | ---: | ---: | --- |
+| Freenove ESP32-S3 | 969322 | 47268 | `ecab23d08ca74cced6057381ab9efbc15763536d74ce05b3dfd5db76d6d6a08a` |
+| XIAO ESP32-C5 | 316242 | 18324 | `cab34fa223506ea738608944fc362e0a4028d03650a4a5b21269aefbbe0b2d75` |
+
+Both target compilers exited zero. The C5 HAL emitted initializer warnings.
+These identify observed build artifacts only. Neither sketch has been flashed
+or physically measured in this qualification. The host suite includes the
+Arduino core's single-argument `bit` macro during the SPD header compilation
+to catch regressions that are invisible with an ordinary desktop C++ include.
