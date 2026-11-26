@@ -33,6 +33,12 @@ success. In particular, a JSON `HARD_FAIL` verdict can return shell exit code
 policy; it must not use the current CLI as a fail-closed design gate. The
 reporter/gate exit contract is owned by
 [issue #12](https://github.com/bio-comp/circuit-ci/issues/12).
+Invalid or ambiguous YAML is rejected before rule evaluation; no result is
+written. Mapping keys must be unique strings and YAML merge keys are
+unsupported. See the [CLI YAML input contract](docs/02_cli.md#yaml-input-contract)
+for alias handling, rejected constructs, and remaining outer-state validation
+limitations (#3).
+
 The original `staging` and `telemetry` files are placeholders.
 
 ## Reproducible development
