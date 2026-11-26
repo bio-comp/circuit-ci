@@ -110,3 +110,15 @@ acceptance, and integrations. Prefer version-qualified KiCad Happy and
 existing EDA tools over duplicating their circuit analysis. The statuses
 `HARD_FAIL`, `MISSING_DATA`, `CONFLICT_REQUIRES_REVIEW`, and `AUTO_PASS`
 are **legacy software outputs**, not stages of engineering qualification.
+
+## Research inputs
+
+For consequential Electronics Lab work, resolve the exact live Drive objects
+from the authorized private Project configuration. Read
+`PROJECT_CANONICAL_FILES.md` and the registered `SOURCE_INDEX.md` before
+selecting sources. Read the registered `electronics_lab_setup.md` when
+ownership or capability matters, then the registered build document when relevant.
+Use the source index's applicability rules and access routes. The
+[offline research coverage command](docs/03_benchmarks.md#research-coverage-command)
+checks a supplied policy, manifest and collector log. A software coverage verdict
+establishes neither engineering correctness nor physical qualification.

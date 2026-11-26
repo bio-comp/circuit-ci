@@ -40,3 +40,33 @@ Candidate metrics, all **unimplemented** as benchmark computations:
 Expanding to 30+ cases is a proposal, not a completed benchmark. Any future
 benchmark must establish independently grounded known-good and known-bad
 cases, measurement provenance and non-vacuous acceptance criteria.
+
+## Research coverage command
+
+Run the bundled **synthetic** example from the repository root:
+
+```bash
+uv run --locked python -m circuit_ci.coverage_gate --policy benchmarks/coverage/policy.json --manifest benchmarks/coverage/manifest.json --receipts benchmarks/coverage/receipts.json
+```
+
+A trusted caller supplies a fresh run ID, exact subject and revision, and a
+nonempty policy listing every mandatory claim/source pair. The policy owner
+assigns stable source identities that identify the document and revision.
+Supply observed receipts through a separate, access-controlled channel from the
+collector. The agent can supply the manifest. If the agent can author or replay
+all three inputs, this command offers no independent evidence of live access.
+
+For each pair, the checker matches the run, subject, revision, source, receipt
+ID, SHA-256 of the preserved UTF-8 body text, and literal passage. Hash the
+collector's exact text extraction, including whitespace. Record the actual
+source identity after redirects. Preserve the original artifact and extraction
+method separately when verification depends on images, PDFs or tables. Partial
+reads, blocked requests, negative searches, citations alone and self-reports
+leave required coverage incomplete. The checker cannot authenticate authors,
+authorize exclusions, infer relevance or verify that a passage supports a claim.
+An independent reviewer still evaluates applicability, conflicts and meaning.
+
+Exit **0** reports `COVERAGE_MET`. Exit **1** reports `COVERAGE_INCOMPLETE`
+with per-claim/source reasons. Exit **2** denotes invalid input or usage.
+These outcomes describe the supplied evidence packet only. Physical qualification
+requires its own procedures and measurements.

@@ -1,0 +1,24 @@
+{
+  "schema_id": "manifest/v1",
+  "run_id": "synthetic-001",
+  "subject": "example display board",
+  "revision": "B",
+  "evidence": [
+    {
+      "claim": "display-interface",
+      "source": "example:design-drawing/rev-B",
+      "outcome": "body_read",
+      "receipt_id": "capture-0",
+      "body_sha256": "fc0c2b5e5e7348e478d0dde28a41a2b081bea9380f4b971ee25ff09e44a7a06c",
+      "passage": "display bus is SPI"
+    },
+    {
+      "claim": "display-interface",
+      "source": "example:board-manual/rev-B",
+      "outcome": "body_read",
+      "receipt_id": "capture-1",
+      "body_sha256": "a4d4bec1ae49601e451e64691d1feec9e27405c928cb069b3e274ca4dc74a373",
+      "passage": "Display: SPI"
+    }
+  ]
+}
