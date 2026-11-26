@@ -38,6 +38,9 @@ jobs:
         run: uv run --locked mypy circuit_ci scripts/check-docs-output.py
       - name: Test and branch coverage
         run: uv run --locked pytest --randomly-seed=42 --cov=circuit_ci --cov-branch --cov-report=term-missing
+      - name: Test embedded examples with synthetic inputs
+        if: matrix.python-version == '3.13'
+        run: bash examples/build_cases/check-hosts.sh
       - name: Verify CLI entrypoints
         run: |
           uv run --locked cci --help
