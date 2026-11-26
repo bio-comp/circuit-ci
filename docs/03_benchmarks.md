@@ -40,3 +40,40 @@ Candidate metrics, all **unimplemented** as benchmark computations:
 Expanding to 30+ cases is a proposal, not a completed benchmark. Any future
 benchmark must establish independently grounded known-good and known-bad
 cases, measurement provenance and non-vacuous acceptance criteria.
+
+## Two embedded build cases
+
+The examples under `examples/build_cases/` contain separate display and SPD reader
+sketches, host-side protocol tests and a replay against the installed `cci` reporter.
+Run these from a checkout with the project's locked Python environment. The host tests
+require a C++17 compiler, Bash, Node.js and Python 3 and use synthetic inputs.
+
+```bash
+bash examples/build_cases/check-hosts.sh
+uv run --locked python examples/build_cases/replay.py
+```
+
+The display parser requires three distinct IPv4 configuration fields. The sketch
+accepts a reading only after the UART modem completes its response. Its U138 source
+describes its own interface. Cached addresses do not establish a live route or
+visibility into other switch ports. An offline Proxmox guest-card oracle checks permission-filtered synthetic responses
+and a 60-second freshness boundary. Its transport result and status are test
+inputs. It performs no network I/O and adds no telemetry screen to the device.
+The SPD reader exercises page selection, read
+pointers, two full reads and two CRCs. Its synthetic 4,096 MiB, 1Rx8 fixture declares
+833 ps tCK. Its DRAM array remains untested even when every host assertion passes.
+
+The replay projects nine display requirements and ten SPD requirements onto the legacy
+PSU input. Each input declares a missing prerequisite. The expected software verdict
+for this projection is `MISSING_DATA`. The command prints case ID, input SHA-256,
+reporter exit code and status. Its own exit code is 0 for agreement on all cases, 1
+for any unexpected verdict, or 2 if the reporter or its output cannot be used.
+Main revision `bb15beaaadab615c026784e2f67c9aa01ca53755` returned `AUTO_PASS`
+and shell exit 0 on all 19. This is reproducible evidence of a rule defect, independent
+of the separate firmware parser checks. These projections contain no electrical netlist,
+power measurement, genuine network telemetry or captured DIMM data.
+
+See issues [#23](https://github.com/bio-comp/circuit-ci/issues/23) and
+[#6](https://github.com/bio-comp/circuit-ci/issues/6) for engineering acceptance.
+Physical build commissioning, native design packs and secure service telemetry remain
+separate work.
